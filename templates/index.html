@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Intel - Product Price Comparison</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+        }
+        .checkbox-group input {
+            margin-right: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status-badges {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-cached {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .best-deal {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .best-deal h2 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+        }
+        .best-deal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .best-deal-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .best-deal-item strong {
+            display: block;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        .best-deal-item span {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .best-deal-reason {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-style: italic;
+        }
+        .results-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .price {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .emi {
+            color: #007bff;
+        }
+        .estimate {
+            font-size: 11px;
+            color: #999;
+            font-style: italic;
+        }
+        .availability {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .availability-in-stock {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .availability-out-of-stock {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .scraped-at {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .product-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .product-link:hover {
+            text-decoration: underline;
+        }
+        .searching {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .filter-note {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+        .source-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .source-croma {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        .source-vijaysales {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        .source-reliance {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 Price Intel</h1>
+    
+    <div class="search-form">
+        <form id="searchForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="model">Mobile Model *</label>
+                    <input type="text" id="model" name="model" required placeholder="e.g., iPhone 17 Pro">
+                </div>
+                <div class="form-group">
+                    <label for="storage">Storage</label>
+                    <input type="text" id="storage" name="storage" placeholder="e.g., 256GB">
+                </div>
+                <div class="form-group">
+                    <label for="colour">Colour</label>
+                    <input type="text" id="colour" name="colour" placeholder="e.g., Silver">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="budget_min">Budget Min (₹)</label>
+                    <input type="number" id="budget_min" name="budget_min" placeholder="Min price">
+                </div>
+                <div class="form-group">
+                    <label for="budget_max">Budget Max (₹)</label>
+                    <input type="number" id="budget_max" name="budget_max" placeholder="Max price">
+                </div>
+                <div class="form-group">
+                    <label for="tenure">EMI Tenure (months)</label>
+                    <select id="tenure" name="tenure">
+                        <option value="6">6 months</option>
+                        <option value="12" selected>12 months</option>
+                        <option value="18">18 months</option>
+                        <option value="24">24 months</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="down_payment">Down Payment (₹)</label>
+                    <input type="number" id="down_payment" name="down_payment" value="0">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bank">Bank (for offers)</label>
+                    <input type="text" id="bank" name="bank" placeholder="e.g., HDFC">
+                </div>
+                <div class="form-group">
+                    <label>Sources</label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" name="sources" value="croma" checked> Croma
+                        </label>
+                        <label>
+                            <input type="checkbox" name="sources" value="vijaysales" checked> Vijay Sales
+                        </label>
+                        <label>
+                            <input type="checkbox" name="sources" value="reliance" checked> Reliance Digital
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" id="searchButton">Search</button>
+        </form>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultsDiv = document.getElementById('results');
+            const searchButton = document.getElementById('searchButton');
+            
+            // Show searching state
+            resultsDiv.innerHTML = '<div class="searching">Searching...</div>';
+            searchButton.disabled = true;
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {
+                model: formData.get('model'),
+                storage: formData.get('storage') || null,
+                colour: formData.get('colour') || null,
+                budget_min: formData.get('budget_min') || null,
+                budget_max: formData.get('budget_max') || null,
+                tenure: parseInt(formData.get('tenure')),
+                down_payment: formData.get('down_payment') || 0,
+                bank: formData.get('bank') || null,
+                sources: []
+            };
+            
+            // Get checked sources
+            document.querySelectorAll('input[name="sources"]:checked').forEach(checkbox => {
+                data.sources.push(checkbox.value);
+            });
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Search failed');
+                }
+                
+                renderResults(result);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                searchButton.disabled = false;
+            }
+        });
+        
+        function renderResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Render status badges
+            let statusBadges = '<div class="status-badges">';
+            for (const [source, status] of Object.entries(data.source_status)) {
+                const statusClass = status.status === 'ok' ? 'status-ok' : 
+                                   (status.status === 'empty' ? 'status-failed' : 'status-cached');
+                const statusText = status.status === 'ok' ? 'OK' : 
+                                   `${status.status.charAt(0).toUpperCase() + status.status.slice(1)}: ${status.reason}`;
+                statusBadges += `<span class="status-badge ${statusClass}">${source}: ${statusText}</span>`;
+            }
+            statusBadges += '</div>';
+            
+            // Render best deal panel
+            let bestDealHTML = '';
+            if (data.best_deal && data.best_deal.best_current_price && data.best_deal.best_current_price.amount) {
+                const lowestEmiHTML = data.best_deal.lowest_emi && data.best_deal.lowest_emi.amount ? 
+                    `<span>₹${data.best_deal.lowest_emi.amount}/month</span>
+                     <small>from ${data.best_deal.lowest_emi.source} (${data.best_deal.lowest_emi.tenure_months} months)</small>` :
+                    '<span>N/A</span><small>No EMI data available</small>';
+                
+                bestDealHTML = `
+                    <div class="best-deal">
+                        <h2>🎯 Best Deal</h2>
+                        <div class="best-deal-grid">
+                            <div class="best-deal-item">
+                                <strong>Best Current Price</strong>
+                                <span>₹${data.best_deal.best_current_price.amount}</span>
+                                <small>from ${data.best_deal.best_current_price.source}</small>
+                            </div>
+                            <div class="best-deal-item">
+                                <strong>Best Effective Price</strong>
+                                <span>₹${data.best_deal.best_effective_price.amount}</span>
+                                <small>from ${data.best_deal.best_effective_price.source}</small>
+                            </div>
+                            <div class="best-deal-item">
+                                <strong>Lowest EMI</strong>
+                                ${lowestEmiHTML}
+                            </div>
+                        </div>
+                        <div class="best-deal-reason">💡 ${data.best_deal.reason}</div>
+                    </div>
+                `;
+            }
+            
+            // Render results table
+            let tableHTML = '';
+            if (data.ranked && data.ranked.length > 0) {
+                let rows = '';
+                data.ranked.forEach((item, index) => {
+                    const listing = item.listing;
+                    const sourceClass = `source-${listing.source}`;
+                    const availabilityClass = listing.availability === 'In Stock' ? 'availability-in-stock' : 'availability-out-of-stock';
+                    const offerText = listing.offers && listing.offers.length > 0 ? listing.offers[0] : 'None';
+                    const scrapedDate = listing.scraped_at ? new Date(listing.scraped_at).toLocaleString() : 'N/A';
+                    
+                    // Calculate EMI from the EMI data
+                    let emiText = 'N/A';
+                    if (item.emi && item.emi.emi_monthly) {
+                        emiText = `₹${item.emi.emi_monthly}`;
+                    }
+                    
+                    rows += `
+                        <tr>
+                            <td><span class="source-tag ${sourceClass}">${listing.source}</span></td>
+                            <td>
+                                <strong>${listing.product_name}</strong>
+                                <div class="scraped-at">Updated: ${scrapedDate}</div>
+                            </td>
+                            <td class="price">₹${listing.selling_price}</td>
+                            <td>${offerText}</td>
+                            <td class="price">₹${item.effective_price} <span class="estimate">(estimate)</span></td>
+                            <td class="emi">${emiText} <span class="estimate">(estimate)</span></td>
+                            <td><span class="availability ${availabilityClass}">${listing.availability}</span></td>
+                            <td><a href="${listing.product_url}" target="_blank" class="product-link">View →</a></td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML = `
+                    <div class="results-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Product Name</th>
+                                    <th>Listed Price</th>
+                                    <th>Offer</th>
+                                    <th>Effective Price</th>
+                                    <th>EMI/month</th>
+                                    <th>Availability</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableHTML = '<div class="error">No results found</div>';
+                
+                // Add filter note if present
+                if (data.filter_note) {
+                    tableHTML = `<div class="filter-note">ℹ️ ${data.filter_note}</div>` + tableHTML;
+                }
+            }
+            
+            resultsDiv.innerHTML = statusBadges + bestDealHTML + tableHTML;
+        }
+    </script>
+</body>
+</html>
