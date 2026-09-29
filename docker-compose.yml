@@ -11,6 +11,7 @@ services:
       - SECRET_KEY=change-this-in-production
     volumes:
       - ./instance:/app/instance
+    command: sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --workers 4 app:app"
     restart: unless-stopped
 
   # Optional PostgreSQL service (uncomment to use instead of SQLite)

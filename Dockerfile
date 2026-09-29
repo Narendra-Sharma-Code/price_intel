@@ -22,8 +22,6 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 ENV DATABASE_URL=sqlite:///instance/price_intel.db
 
-# Run migrations
-RUN flask db upgrade
 
 # Expose port
 EXPOSE 5000
