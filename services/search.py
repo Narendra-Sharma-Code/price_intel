@@ -11,6 +11,7 @@ from services.matcher import group_listings, MatchResult
 from services.offers import compute_effective_price
 from services.emi import calculate_emi
 from services.ranking import rank_listings
+from config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,6 @@ def search_products(
             
             # Check if we should use cached data
             use_cached = False
-            from config import Config
             if Config.USE_CACHED_DATA:
                 use_cached = True
             
@@ -176,7 +176,7 @@ def search_products(
                 if principal > 0:
                     emi_result = calculate_emi(
                         principal=principal,
-                        annual_rate=Decimal('12'),  # Assume 12% for now
+                        annual_rate=Config.DEFAULT_ANNUAL_INTEREST_RATE,
                         tenure_months=tenure
                     )
             
